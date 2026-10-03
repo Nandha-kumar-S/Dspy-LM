@@ -1,12 +1,8 @@
 import os
 import yaml
-import json
 import pandas as pd
 import logging
-from tqdm import tqdm
-from huggingface_hub import login
 import dspy
-from dspy.evaluate import Evaluate
 from dspy.evaluate.metrics import answer_exact_match
 from dspy.teleprompt import BootstrapFewShotWithRandomSearch
 from scripts.utils import process_df, get_history
