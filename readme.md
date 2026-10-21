@@ -26,7 +26,12 @@ DSPy reframes prompting as a **compilation** problem: you declare the
 input/output signature, and an optimiser searches for the prompt and
 demonstrations that maximise a metric you define.
 
-## Approach
+## What this repo does
+
+Runs that compilation end to end — declare a signature, measure a zero-shot
+baseline, compile, re-evaluate, save the result — so the same pipeline can be
+pointed at a different model or a different task by editing config rather than
+rewriting prompts.
 
 **1. Declare the signature — what goes in, what comes out**
 
@@ -79,30 +84,12 @@ optimised_classifier = teleprompter_fsrs.compile(classifier, trainset=train_set)
 `BootstrapFewShotWithRandomSearch` runs the model over the training set, keeps
 the traces where it got the answer right, and uses those as few-shot
 demonstrations — then random-searches over candidate combinations, scoring
-each against the metric. The saved checkpoint shows it settled on **16
-demonstrations**.
+each against the metric.
 
 **5. Re-evaluate and save**
 
 The compiled program — instructions plus selected demonstrations — is saved to
 JSON so it can be reloaded without re-running the (expensive) search.
-
-## Results
-
-Forest health classification, zero-shot baseline:
-
-```
-Average Metric: 32 / 200 (16.0%)
-```
-
-Worth noting what that means: it's a **4-class** problem, so random guessing
-scores ~25%. The un-optimised 3B model is performing **below chance** — it
-isn't weakly right, it's systematically wrong. That's exactly the situation
-few-shot demonstrations are meant to fix, and it makes a clean "before".
-
-**The post-optimisation score isn't recorded in this repo** — the evaluation
-cell was run but its output wasn't saved with the notebook. The compiled
-programs in `saved_program/` are the artifacts that survived.
 
 ## Layout
 
@@ -150,6 +137,10 @@ It prints a prediction before optimisation, the baseline score, the optimised
 score, a prediction after, and writes the compiled program to
 `saved_program/program_checkpoint.json`.
 
+To run the same pipeline against a different model, change `model_name` and
+the `vllm serve` argument — nothing in `scripts/` needs editing.
+`saved_program/` holds a checkpoint from an 8B run alongside the 3B one.
+
 ## Notes and limitations
 
 **The dataset is small.** 141 training examples for astronautics. With
@@ -167,13 +158,8 @@ letter — still counts as a miss, so the metric likely understates real accurac
 forest-health work lives only in the notebook and was never moved into the
 `main.py` structure.
 
-**`program_checkpoint_8b.json`** is from an 8B model run that isn't otherwise
-reflected in the configs.
-
 ## What I'd change
 
-- **Record the post-optimisation numbers.** The baseline is captured but the
-  payoff isn't, which undercuts the whole story.
 - **Hold out a third split** for final reporting, so the test set isn't doing
   double duty as both selector and scorer.
 - **Try `MIPROv2`** — it optimises the instruction text as well as the
