@@ -157,19 +157,3 @@ letter — still counts as a miss, so the metric likely understates real accurac
 **Two tasks share one repo.** `saved_program/` holds artifacts from both; the
 forest-health work lives only in the notebook and was never moved into the
 `main.py` structure.
-
-## What I'd change
-
-- **Hold out a third split** for final reporting, so the test set isn't doing
-  double duty as both selector and scorer.
-- **Try `MIPROv2`** — it optimises the instruction text as well as the
-  demonstrations, where `BootstrapFewShotWithRandomSearch` only selects
-  examples.
-- **A softer metric than exact match** — normalise punctuation and option
-  prefixes before comparing, so formatting noise doesn't read as a wrong answer.
-- **Move the forest-health task into the `main.py` structure** so both tasks run
-  the same way.
-
-## Built with
-
-DSPy · Llama-3.2-3B-Instruct · vLLM · pandas · scikit-learn
